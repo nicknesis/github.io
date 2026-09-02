@@ -12,8 +12,8 @@ uint16_t COLOR_MTA_BLUE;
 uint16_t COLOR_WHITE;
 uint16_t COLOR_YELLOW;
 
-// Small 8x8 "bullet" marker used next to the UPTOWN/DOWNTOWN labels: a
-// filled blue circle with a white "C", echoing the real subway bullet.
+// Small 8x8 "bullet" marker used next to the direction label: a filled
+// blue circle with a white "C", echoing the real subway bullet.
 void drawMiniBullet(int x, int y) {
   matrix->fillCircle(x + 3, y + 3, 4, COLOR_MTA_BLUE);
   matrix->setTextSize(1);
@@ -28,21 +28,6 @@ void printLabelRow(int y, const char *label) {
   matrix->setTextColor(COLOR_WHITE);
   matrix->setCursor(10, y + 1);
   matrix->print(label);
-}
-
-void printMinutesRow(int y, const int *minutes, int count) {
-  matrix->setTextSize(1);
-  matrix->setTextColor(COLOR_YELLOW);
-  matrix->setCursor(1, y);
-  if (count == 0) {
-    matrix->print("no data");
-    return;
-  }
-  for (int i = 0; i < count; i++) {
-    if (i > 0) matrix->print(" ");
-    matrix->print(minutes[i]);
-    matrix->print("m");
-  }
 }
 
 }  // namespace
@@ -97,9 +82,29 @@ void displayTimesScreen(const TrainArrivals &arrivals) {
     return;
   }
 
-  printLabelRow(0, "UPTOWN");
-  printMinutesRow(8, arrivals.uptownMinutes, arrivals.uptownCount);
+  printLabelRow(0, DIRECTION_LABEL);
 
-  printLabelRow(16, "DOWNTN");
-  printMinutesRow(24, arrivals.downtownMinutes, arrivals.downtownCount);
+  // Big, easy-to-read countdown to the very next train.
+  matrix->setTextSize(2);
+  matrix->setTextColor(COLOR_YELLOW);
+  matrix->setCursor(1, 9);
+  if (arrivals.count == 0) {
+    matrix->print("--");
+  } else {
+    matrix->print(arrivals.minutes[0]);
+    matrix->print("m");
+  }
+
+  // Smaller line underneath for the trains after that.
+  matrix->setTextSize(1);
+  matrix->setTextColor(COLOR_WHITE);
+  matrix->setCursor(1, 25);
+  if (arrivals.count > 1) {
+    matrix->print("then ");
+    for (int i = 1; i < arrivals.count; i++) {
+      if (i > 1) matrix->print(" ");
+      matrix->print(arrivals.minutes[i]);
+      matrix->print("m");
+    }
+  }
 }

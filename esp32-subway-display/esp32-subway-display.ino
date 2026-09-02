@@ -1,5 +1,5 @@
 // ESP32 + 64x32 HUB75 RGB matrix panel: MTA "C" train bullet logo with
-// live-updating uptown/downtown arrival times.
+// live-updating countdown to Manhattan-bound trains at Clinton-Washington Avs.
 //
 // See README.md for wiring, library requirements, and how to configure
 // config.h for your WiFi network and station.

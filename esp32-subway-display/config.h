@@ -15,18 +15,19 @@
 #define MTA_FEED_URL "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-ace"
 
 // ── Station to watch ─────────────────────────────────────────────────────
-// Look up your station's stop_id in the MTA's static GTFS "stops.txt":
-// https://www.mta.info/developers -> Subway static feed -> stops.txt
-// Subway stop_ids end in N (uptown/northbound) or S (downtown/southbound).
-// The example below is 168 St on the 8th Ave line (parent stop_id "A15").
-#define STOP_ID_UPTOWN   "A15N"
-#define STOP_ID_DOWNTOWN "A15S"
+// Clinton-Washington Avs (Fulton St line), Manhattan-bound (N) side.
+// Confirmed against MTA's static GTFS stops.txt: parent stop "A44",
+// direction "N" heads toward 168 St / Manhattan.
+#define STOP_ID_TARGET "A44N"
+
+// Label shown on the display above the arrival countdown.
+#define DIRECTION_LABEL "MANHATTAN"
 
 // Route letter this display tracks (used to filter the shared A/C/E feed).
 #define TARGET_ROUTE_ID "C"
 
-// How many upcoming arrivals to keep per direction.
-#define MAX_ARRIVALS_PER_DIRECTION 2
+// How many upcoming arrivals to keep.
+#define MAX_ARRIVALS 3
 
 // ── Timing ────────────────────────────────────────────────────────────────
 #define FETCH_INTERVAL_MS 30000  // how often to re-poll the MTA feed

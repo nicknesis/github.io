@@ -3,9 +3,9 @@
 Drives a 64x32 HUB75 RGB LED matrix panel from an ESP32 dev board to show:
 
 - The MTA "C" train bullet logo (blue circle, white "C"), and
-- Live uptown/downtown arrival countdowns for a station of your choice,
-  pulled straight from MTA's public GTFS-realtime feed and refreshed
-  every 30 seconds.
+- A live countdown to the next Manhattan-bound C trains at
+  Clinton-Washington Avs, pulled straight from MTA's public
+  GTFS-realtime feed and refreshed every 30 seconds.
 
 The two screens alternate automatically (logo for a few seconds, then
 times, on repeat).
@@ -64,14 +64,19 @@ Power the panel from its own 5V supply, not the ESP32.
 Edit `config.h` before flashing:
 
 - `WIFI_SSID` / `WIFI_PASSWORD` — your network credentials.
-- `STOP_ID_UPTOWN` / `STOP_ID_DOWNTOWN` — the GTFS stop IDs for your
-  station. Look these up in MTA's static GTFS `stops.txt`
-  (linked from https://www.mta.info/developers). Subway stop IDs end in
-  `N` (uptown/northbound) or `S` (downtown/southbound) — e.g. `A15N` /
-  `A15S` for 168 St on the 8th Ave line, which the C train serves.
+- `STOP_ID_TARGET` — defaults to `"A44N"`: Clinton-Washington Avs,
+  Manhattan-bound. Confirmed against MTA's static GTFS `stops.txt`
+  (parent stop `A44`; the `N` suffix is the direction that heads to
+  168 St / Manhattan on this line). To track a different station or the
+  other direction, look up the stop ID in `stops.txt`
+  (linked from https://www.mta.info/developers) — subway stop IDs end in
+  `N` (uptown/toward Manhattan on this line) or `S` (downtown/away from
+  Manhattan).
+- `DIRECTION_LABEL` — the text shown above the countdown; defaults to
+  `"MANHATTAN"`.
 - `TARGET_ROUTE_ID` — defaults to `"C"`. The A/C/E feed carries all three
   routes; this filters to just the one you want. Change it (and the feed
-  URL/stop IDs) if you'd rather track the A or E train.
+  URL/stop ID) if you'd rather track the A or E train.
 - `MTA_FEED_URL` — defaults to the public A/C/E feed. See
   https://api.mta.info/#/subwayRealTimeFeeds for the full feed list if
   MTA ever changes the endpoint.
@@ -101,7 +106,7 @@ ID, arrival time) and ignores everything else.
   the main loop, so the display briefly pauses during each refresh. For
   smoother animation, move `fetchArrivals()` onto a separate FreeRTOS
   task pinned to the other core.
-- **Layout**: text layout constants live in `display_ui.cpp` — tweak
-  `printLabelRow`/`printMinutesRow` positions if you want a different
-  look, more arrivals per direction, or to add a "delayed"/service-alert
-  banner using the feed's `alert` entities.
+- **Layout**: text layout constants live in `display_ui.cpp`'s
+  `displayTimesScreen` — tweak positions if you want a different look,
+  more upcoming arrivals (raise `MAX_ARRIVALS` in `config.h` too), or to
+  add a "delayed"/service-alert banner using the feed's `alert` entities.

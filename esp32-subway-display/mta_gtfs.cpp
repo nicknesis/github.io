@@ -186,12 +186,9 @@ void parseTripUpdate(Stream &s, long len, TrainArrivals &out) {
         int minutes = (int)((stu.arrival - now) / 60);
         if (minutes < 0) continue;
 
-        if (strcmp(stu.stopId, STOP_ID_UPTOWN) == 0 &&
-            out.uptownCount < MAX_ARRIVALS_PER_DIRECTION) {
-          out.uptownMinutes[out.uptownCount++] = minutes;
-        } else if (strcmp(stu.stopId, STOP_ID_DOWNTOWN) == 0 &&
-                   out.downtownCount < MAX_ARRIVALS_PER_DIRECTION) {
-          out.downtownMinutes[out.downtownCount++] = minutes;
+        if (strcmp(stu.stopId, STOP_ID_TARGET) == 0 &&
+            out.count < MAX_ARRIVALS) {
+          out.minutes[out.count++] = minutes;
         }
       }
     } else if (!skipField(s, left, wireType)) {
@@ -287,12 +284,10 @@ bool fetchArrivals(TrainArrivals &out) {
   parseFeedMessage(*stream, contentLength, fresh);
   http.end();
 
-  sortAscending(fresh.uptownMinutes, fresh.uptownCount);
-  sortAscending(fresh.downtownMinutes, fresh.downtownCount);
+  sortAscending(fresh.minutes, fresh.count);
   fresh.valid = true;
   out = fresh;
 
-  Serial.printf("Fetched arrivals -- uptown: %d, downtown: %d\n",
-                fresh.uptownCount, fresh.downtownCount);
+  Serial.printf("Fetched arrivals -- %d upcoming\n", fresh.count);
   return true;
 }
