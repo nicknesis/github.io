@@ -199,11 +199,32 @@
       .sort((a, b) => a - b);
   }
 
+  // The train-times API only allows requests from its own website (CORS),
+  // so browser requests from anywhere else have to go through a proxy that
+  // adds permissive CORS headers. Try a couple, in case one is down.
+  const TARGET_URL = `https://api.wheresthefuckingtrain.com/by-id/${STATION_ID}`;
+  const PROXIES = [
+    u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+  ];
+
+  async function fetchViaProxies() {
+    let lastErr;
+    for (const makeUrl of PROXIES) {
+      try {
+        const res = await fetch(makeUrl(TARGET_URL));
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+      } catch (err) {
+        lastErr = err;
+      }
+    }
+    throw lastErr;
+  }
+
   async function loadTimes() {
     try {
-      const res = await fetch(`https://api.wheresthefuckingtrain.com/by-id/${STATION_ID}`);
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const json = await res.json();
+      const json = await fetchViaProxies();
 
       if (DEBUG) debugEl.textContent = JSON.stringify(json, null, 2);
 
