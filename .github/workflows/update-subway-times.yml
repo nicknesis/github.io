@@ -1,0 +1,40 @@
+name: Update subway times
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch C train arrivals at Clinton-Washington Aves
+        env:
+          STATION_ID: A44
+          ROUTE: C
+          DIRECTION: N
+        run: |
+          set -euo pipefail
+          curl -sf "https://api.wheresthefuckingtrain.com/by-id/${STATION_ID}" \
+            | jq --arg route "$ROUTE" --arg dir "$DIRECTION" \
+              '{
+                updated: .updated,
+                station: .data[0].name,
+                arrivals: [.data[0][$dir][] | select(.route == $route) | .time]
+              }' > times.json
+
+      - name: Commit if changed
+        run: |
+          if ! git diff --quiet -- times.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add times.json
+            git commit -m "Update subway times"
+            git push
+          fi
