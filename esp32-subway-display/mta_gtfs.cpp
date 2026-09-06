@@ -1,6 +1,7 @@
 #include "mta_gtfs.h"
 
 #include <HTTPClient.h>
+#include <WiFiClient.h>
 #include <WiFiClientSecure.h>
 #include <string.h>
 #include <time.h>
