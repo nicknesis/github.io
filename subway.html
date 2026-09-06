@@ -173,9 +173,11 @@
   const statusEl = document.getElementById('status');
   const debugEl = document.getElementById('debug');
 
+  const STALE_AFTER_MS = 10 * 60 * 1000;
+
   function minutesFromNow(isoTime) {
     const diffMs = new Date(isoTime).getTime() - Date.now();
-    return Math.max(0, Math.round(diffMs / 60000));
+    return Math.round(diffMs / 60000);
   }
 
   async function loadTimes() {
@@ -187,11 +189,20 @@
 
       if (DEBUG) debugEl.textContent = JSON.stringify(json, null, 2);
 
+      // Trains that already passed (data hasn't refreshed yet) shouldn't
+      // linger on screen showing "now" forever, so drop anything more than
+      // a few seconds old instead of clamping it to 0.
       const arrivals = (json.arrivals || [])
         .map(minutesFromNow)
+        .filter(mins => mins >= 0)
         .sort((a, b) => a - b);
       render(arrivals);
-      statusEl.textContent = 'Updated ' + new Date().toLocaleTimeString();
+
+      const updatedAgoMs = json.updated ? Date.now() - new Date(json.updated).getTime() : null;
+      const stale = updatedAgoMs !== null && updatedAgoMs > STALE_AFTER_MS;
+      statusEl.textContent = stale
+        ? `Data last checked ${Math.round(updatedAgoMs / 60000)} min ago, may be behind`
+        : 'Updated ' + new Date().toLocaleTimeString();
     } catch (err) {
       console.error(err);
       boardEl.innerHTML = `<div class="error">Couldn't load train times.<br>${err.message}</div>`;
