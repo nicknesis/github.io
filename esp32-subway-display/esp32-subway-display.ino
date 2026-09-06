@@ -16,12 +16,31 @@ unsigned long lastScreenSwitchMs = 0;
 bool showingLogo = true;
 
 void connectWiFi() {
+  Serial.println("Scanning for nearby WiFi networks...");
+  int n = WiFi.scanNetworks();
+  if (n <= 0) {
+    Serial.println("  (none found -- that's unusual, worth trying again)");
+  } else {
+    for (int i = 0; i < n; i++) {
+      Serial.printf("  seen: \"%s\" (signal %d dBm)\n", WiFi.SSID(i).c_str(), WiFi.RSSI(i));
+    }
+  }
+  Serial.printf("Target network from config.h: \"%s\"\n", WIFI_SSID);
+
   Serial.print("Connecting to WiFi");
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  unsigned long start = millis();
   while (WiFi.status() != WL_CONNECTED) {
     delay(400);
     Serial.print(".");
+    if (millis() - start > 15000) {
+      Serial.println();
+      Serial.printf("Still not connected after 15s. WiFi.status() = %d\n", WiFi.status());
+      Serial.println("(1=network not found, 4=connect failed, 6=wrong password, 7=disconnected)");
+      start = millis();
+    }
   }
   Serial.println();
   Serial.print("WiFi connected, IP: ");
