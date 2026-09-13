@@ -95,16 +95,15 @@ void displayTimesScreen(const TrainArrivals &arrivals) {
     matrix->print("m");
   }
 
-  // Smaller line underneath for the trains after that.
+  // Smaller line underneath for the next train after that. Only one --
+  // the panel is 64px wide, and "then 12m 24m" doesn't fit (it's 78px of
+  // text), so it was getting cut off mid-number instead of wrapping.
   matrix->setTextSize(1);
   matrix->setTextColor(COLOR_WHITE);
   matrix->setCursor(1, 25);
   if (arrivals.count > 1) {
     matrix->print("then ");
-    for (int i = 1; i < arrivals.count; i++) {
-      if (i > 1) matrix->print(" ");
-      matrix->print(arrivals.minutes[i]);
-      matrix->print("m");
-    }
+    matrix->print(arrivals.minutes[1]);
+    matrix->print("m");
   }
 }
