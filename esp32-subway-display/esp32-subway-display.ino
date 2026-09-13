@@ -12,8 +12,6 @@
 
 TrainArrivals arrivals;
 unsigned long lastFetchMs = 0;
-unsigned long lastScreenSwitchMs = 0;
-bool showingLogo = true;
 
 void connectWiFi() {
   Serial.println("Scanning for nearby WiFi networks...");
@@ -66,7 +64,6 @@ void setup() {
 
   fetchArrivals(arrivals);
   lastFetchMs = millis();
-  lastScreenSwitchMs = millis();
 }
 
 void loop() {
@@ -81,17 +78,6 @@ void loop() {
     lastFetchMs = now;
   }
 
-  unsigned long screenDuration = showingLogo ? LOGO_DISPLAY_MS : TIMES_DISPLAY_MS;
-  if (now - lastScreenSwitchMs >= screenDuration) {
-    showingLogo = !showingLogo;
-    lastScreenSwitchMs = now;
-  }
-
-  if (showingLogo) {
-    displayLogoScreen();
-  } else {
-    displayTimesScreen(arrivals);
-  }
-
+  displayTimesScreen(arrivals);
   delay(50);
 }
